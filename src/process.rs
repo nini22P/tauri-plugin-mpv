@@ -47,6 +47,11 @@ pub fn init_mpv_process<R: Runtime>(
 
     info!("Initializing mpv for window '{}'...", window_label);
 
+    let audio_only = mpv_config
+        .args
+        .iter()
+        .any(|arg| arg == "--no-video" || arg == "--video=no" || arg == "--vid=no");
+
     let wid_arg = mpv_config
         .args
         .iter()
@@ -63,13 +68,32 @@ pub fn init_mpv_process<R: Runtime>(
         }
     });
 
-    let wid: i64 = if let Some(parsed_wid) = parsed_wid {
-        parsed_wid
+    let wid: Option<i64> = if let Some(parsed_wid) = parsed_wid {
+        Some(parsed_wid)
+    } else if audio_only {
+        info!(
+            "Audio-only mode detected for window '{}'. Skipping window embedding.",
+            window_label
+        );
+        None
     } else {
-        let window = app
-            .get_webview_window(window_label)
-            .ok_or_else(|| crate::Error::WindowNotFound(window_label.to_string()))?;
-        get_wid(window.window_handle()?.as_raw())?
+        let wid_result = (|| -> crate::Result<i64> {
+            let window = app
+                .get_webview_window(window_label)
+                .ok_or_else(|| crate::Error::WindowNotFound(window_label.to_string()))?;
+            get_wid(window.window_handle()?.as_raw())
+        })();
+
+        match wid_result {
+            Ok(w) => Some(w),
+            Err(e) => {
+                error!(
+                    "Failed to get wid for window '{}': {}. Skipping window embedding.",
+                    window_label, e
+                );
+                None
+            }
+        }
     };
 
     // libmpv profile: https://github.com/mpv-player/mpv/blob/master/etc/builtin.conf#L21
@@ -78,17 +102,27 @@ pub fn init_mpv_process<R: Runtime>(
         "--profile=libmpv".to_string(),
     ];
 
-    if parsed_wid.is_none() {
-        args.push(format!("--wid={}", wid));
+    if let Some(w) = wid {
+        if parsed_wid.is_none() {
+            args.push(format!("--wid={}", w));
+        }
     }
 
     args.extend(mpv_config.args.iter().cloned());
 
     debug!("Using IPC pipe: {}", ipc_pipe);
-    debug!(
-        "Starting mpv process for window '{}' (WID: {})",
-        window_label, wid
-    );
+
+    if let Some(w) = wid {
+        debug!(
+            "Starting mpv process for window '{}' (WID: {})",
+            window_label, w
+        );
+    } else {
+        debug!(
+            "Starting mpv process for window '{}' (No WID)",
+            window_label
+        );
+    }
 
     let mpv_path = mpv_config.path;
 

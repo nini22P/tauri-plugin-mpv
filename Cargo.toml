@@ -1,14 +1,14 @@
 [package]
 name = "tauri-plugin-mpv"
-version = "0.2.7"
+version = "0.5.1"
 authors = ["22"]
-description = "A Tauri plugin to embed the mpv player in your app via JSON IPC."
+description = "A Tauri plugin for embedding the mpv player in your app by controlling its process via JSON IPC."
 edition = "2021"
 rust-version = "1.77.2"
-license = "MIT"
+license = "MPL-2.0"
 repository = "https://github.com/nini22P/tauri-plugin-mpv"
 keywords = ["tauri", "plugin", "mpv", "media", "player"]
-categories = ["multimedia", "gui", "api-bindings"]
+categories = ["multimedia", "gui"]
 readme = "README.md"
 exclude = ["/examples", "/dist-js", "/guest-js", "/node_modules", "/target"]
 links = "tauri-plugin-mpv"

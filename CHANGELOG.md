@@ -1,3 +1,8 @@
+## v0.5.1
+
+- Skip window embedding in audio-only mode (e.g., when using `--no-video`, `--video=no` or `--vid=no` in `args`).
+  > **Note:** Ensure `--force-window` is not set in `args` to prevent a standalone window from appearing.
+
 ## v0.5.0
 
 - **BREAKING:** The `observeMpvProperties` function has been deprecated. Use `observeProperties` instead.

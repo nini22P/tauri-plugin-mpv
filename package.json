@@ -1,6 +1,6 @@
 {
   "name": "tauri-plugin-mpv-api",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "author": "22",
   "description": "A Tauri plugin for embedding the mpv player in your app by controlling its process via JSON IPC.",
   "license": "MPL-2.0",
@@ -42,6 +42,7 @@
   ],
   "scripts": {
     "build": "rollup -c",
+    "dev": "pnpm build && cd examples/react && pnpm i && pnpm tauri dev",
     "prepublishOnly": "pnpm run build",
     "pretest": "pnpm run build",
     "lint": "eslint ."
