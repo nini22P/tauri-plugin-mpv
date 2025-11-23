@@ -1,11 +1,19 @@
-import { destroyMpv, initializeMpv, MpvConfig, observeMpvProperties, sendMpvCommand } from "tauri-plugin-mpv-api";
+import {
+  MpvConfig,
+  init,
+  observeProperties,
+  command,
+  setProperty,
+  getProperty,
+  destroy,
+} from 'tauri-plugin-mpv-api'
 
 // Properties to observe
-const OBSERVED_PROPERTIES = ['pause', 'time-pos', 'duration', 'filename'] as const;
+const OBSERVED_PROPERTIES = ['pause', 'time-pos', 'duration', 'filename'] as const
 
 // mpv configuration
 const mpvConfig: MpvConfig = {
-  mpvArgs: [
+  args: [
     '--vo=gpu-next',
     '--hwdec=auto-safe',
     '--keep-open=yes',
@@ -13,42 +21,49 @@ const mpvConfig: MpvConfig = {
   ],
   observedProperties: OBSERVED_PROPERTIES,
   ipcTimeoutMs: 2000,
-};
-
-// Initialize mpv
-try {
-  console.log('Initializing mpv with properties:', OBSERVED_PROPERTIES);
-  await initializeMpv(mpvConfig);
-  console.log('mpv initialization completed successfully!');
-} catch (error) {
-  console.error('mpv initialization failed:', error);
 }
 
-// Destroy mpv when no longer needed
-await destroyMpv();
+try {
+  await init(mpvConfig)
+  console.log('mpv initialization completed successfully!')
+} catch (error) {
+  console.error('mpv initialization failed:', error)
+}
 
 // Observe properties
-const unlisten = await observeMpvProperties(
+const unlisten = await observeProperties(
   OBSERVED_PROPERTIES,
   ({ name, data }) => {
     switch (name) {
       case 'pause':
-        console.log('Playback paused state:', data);
-        break;
+        console.log('Playback paused state:', data)
+        break
       case 'time-pos':
-        console.log('Current time position:', data);
-        break;
+        console.log('Current time position:', data)
+        break
       case 'duration':
-        console.log('Duration:', data);
-        break;
+        console.log('Duration:', data)
+        break
       case 'filename':
-        console.log('Current playing file:', data);
-        break;
+        console.log('Current playing file:', data)
+        break
     }
-  });
+  })
 
-// Unlisten when no longer needed
-unlisten();
+// Use the simple shortcut for most commands
+await command('loadfile', ['/path/to/video.mp4'])
+await command('seek', [10, 'relative']) // Seek 10 seconds forward
 
-// Load and play a file
-await sendMpvCommand({ command: ['loadfile', '/path/to/video.mp4'] });
+// Use the full object format if you need to provide a custom request_id
+await command({ command: ['stop'], request_id: 123 })
+
+// setProperty
+await setProperty('volume', 75)
+
+// getProperty
+const volume = await getProperty('volume')
+console.log('Current volume:', volume)
+
+// Clean up when closed or no longer needed
+// unlisten()
+// await destroy()

@@ -1,7 +1,7 @@
-import { setVideoMarginRatio } from 'tauri-plugin-mpv-api';
+import { setVideoMarginRatio } from 'tauri-plugin-mpv-api'
 
 // Leave 10% space at bottom for control bar
-await setVideoMarginRatio({ bottom: 0.1 });
+await setVideoMarginRatio({ bottom: 0.1 })
 
 // Leave margins on all sides
 await setVideoMarginRatio({
@@ -9,7 +9,7 @@ await setVideoMarginRatio({
   right: 0.05,
   top: 0.1,
   bottom: 0.15
-});
+})
 
 // Reset margins (remove all margins)
 await setVideoMarginRatio({
@@ -17,4 +17,4 @@ await setVideoMarginRatio({
   right: 0,
   top: 0,
   bottom: 0
-});
+})

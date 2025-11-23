@@ -10,7 +10,7 @@ A Tauri plugin for embedding the mpv player in your app by controlling its proce
 
 ### Prerequisites
 
-- [mpv](https://mpv.io/) must be installed and available in your system PATH
+- [mpv](https://mpv.io/) must be installed and available in your system PATH or specified `path` in `MpvConfig`.
 - Tauri v2.x
 - Node.js 18+
 
@@ -106,9 +106,6 @@ const unlisten = await observeProperties(
     }
   })
 
-// Unlisten when no longer needed
-unlisten()
-
 // Use the simple shortcut for most commands
 await command('loadfile', ['/path/to/video.mp4'])
 await command('seek', [10, 'relative']) // Seek 10 seconds forward
@@ -123,15 +120,34 @@ await setProperty('volume', 75)
 const volume = await getProperty('volume')
 console.log('Current volume:', volume)
 
-// Destroy mpv when your app closes or the player is no longer needed
-await destroy()
+// Clean up when closed or no longer needed
+// unlisten()
+// await destroy()
+```
+
+## Extending Property Types
+
+To add custom mpv properties for full type safety, create a declaration file and extend `MpvPropertyTypes`:
+
+```typescript
+// src/mpv.d.ts
+import 'tauri-plugin-mpv-api'
+
+declare module 'tauri-plugin-mpv-api' {
+  interface MpvPropertyTypes {
+    'file-size'?: number
+    'file-format'?: string
+  }
+}
 ```
 
 ## Platform Support
 
-- ✅ **Windows** - Fully tested and supported
-- ⚠️ **Linux** - Not tested
-- ⚠️ **macOS** - Not tested
+| Platform | Status | Notes |
+| :--- | :---: | :--- |
+| **Windows** | ✅ | Fully tested. |
+| **Linux** | ⚠️ | Window embedding is not working. |
+| **macOS** | ⚠️ | Not tested. |
 
 ## Contributing
 
